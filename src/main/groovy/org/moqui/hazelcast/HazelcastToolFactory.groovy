@@ -21,14 +21,17 @@ import com.hazelcast.config.PartitionGroupConfig
 import com.hazelcast.config.XmlConfigBuilder
 import com.hazelcast.core.Hazelcast
 import com.hazelcast.core.HazelcastInstance
-import com.hazelcast.kubernetes.HazelcastKubernetesDiscoveryStrategyFactory
 import groovy.transform.CompileStatic
 import org.moqui.context.ExecutionContextFactory
 import org.moqui.context.ToolFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.InputStream
 
-/** ElasticSearch Client is used for indexing and searching documents */
+/** HazelcastToolFactory is used as an in-memory computing platform
+    that serves as both a distributed cache and a distributed computing system,
+    enabling ultra-low-latency access to data and parallel execution of tasks
+    across a cluster of servers. */
 @CompileStatic
 class HazelcastToolFactory implements ToolFactory<HazelcastInstance> {
     protected final static Logger logger = LoggerFactory.getLogger(HazelcastToolFactory.class)
@@ -54,13 +57,20 @@ class HazelcastToolFactory implements ToolFactory<HazelcastInstance> {
         Config hzConfig
         if (System.getProperty("hazelcast.config")) {
             logger.info("Starting Hazelcast with hazelcast.config system property (${System.getProperty("hazelcast.config")})")
-            hzConfig = new Config("moqui")
+            hzConfig = new XmlConfigBuilder(System.getProperty("hazelcast.config")).build()
         } else {
             logger.info("Starting Hazelcast with hazelcast.xml from classpath")
-            // logger.info(ObjectUtilities.getStreamText(Thread.currentThread().getContextClassLoader().getResourceAsStream("hazelcast.xml")))
-            hzConfig = new XmlConfigBuilder(Thread.currentThread().getContextClassLoader().getResourceAsStream("hazelcast.xml")).build()
-            hzConfig.setInstanceName("moqui")
+            InputStream hzXmlStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("hazelcast.xml")
+            if (hzXmlStream != null) {
+                hzConfig = hzXmlStream.withCloseable { InputStream is ->
+                    return new XmlConfigBuilder(is).build()
+                }
+            } else {
+                logger.warn("No hazelcast.config system property and hazelcast.xml not found on classpath, using default Hazelcast Config(\"moqui\")")
+                hzConfig = new Config("moqui")
+            }
         }
+        if (!hzConfig.instanceName) hzConfig.instanceName = "moqui"
 
         // NOTE: programmatically set various settings instead of using ${} placeholders in hazelcast.xml because Hazelcast uses
         //     placeholder value instead of empty/null if property not specified, ie no way to not set a property using that approach
@@ -166,10 +176,11 @@ class HazelcastToolFactory implements ToolFactory<HazelcastInstance> {
 
     @Override
     void destroy() {
-        // shutdown Hazelcast
-        Hazelcast.shutdownAll()
-        // the above may be better than this: if (hazelcastInstance != null) hazelcastInstance.shutdown()
-        logger.info("Hazelcast shutdown")
+        if (hazelcastInstance != null) {
+            hazelcastInstance.shutdown()
+            hazelcastInstance = null
+            logger.info("Hazelcast shutdown")
+        }
     }
 
     ExecutionContextFactory getEcf() { return ecf }
