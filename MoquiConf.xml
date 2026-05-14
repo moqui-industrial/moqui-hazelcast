@@ -46,6 +46,7 @@
         <tool-factory class="org.moqui.hazelcast.HazelcastDciTopicToolFactory" init-priority="06" disabled="false"/>
         <tool-factory class="org.moqui.hazelcast.HazelcastNotificationTopicToolFactory" init-priority="06" disabled="false"/>
         <tool-factory class="org.moqui.hazelcast.HazelcastExecutorToolFactory" init-priority="06" disabled="false"/>
+        <tool-factory class="org.moqui.hazelcast.HazelcastScheduledExecutorToolFactory" init-priority="06" disabled="false"/>
     </tools>
 
     <cache-list distributed-factory="HazelcastCache"/>
@@ -102,7 +103,7 @@
     </screen-facade>
 
     <!-- Now set on ServiceFacade programmatically in post-facade init so HazelcastExecutorToolFactory doesn't have to init before facades:
-        <service-facade distributed-factory="HazelcastExecutor"/> -->
+        <service-facade distributed-executor-factory="HazelcastExecutor" distributed-scheduled-executor-factory="HazelcastScheduledExecutor"/> -->
 
     <entity-facade distributed-cache-invalidate="true" dci-topic-factory="HazelcastDciTopic"/>
 </moqui-conf>

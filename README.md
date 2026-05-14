@@ -6,6 +6,7 @@
 Moqui Framework tool component for Hazelcast, used for:
 
 - distributed async service execution
+- distributed scheduled service execution
 - entity distributed cache invalidation
 - web session replication
 - distributed cache (javax.cache implementation)

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This software is in the public domain under CC0 1.0 Universal plus a
+Grant of Patent License.
+
+To the extent possible under law, the author(s) have dedicated all
+copyright and related and neighboring rights to this software to the
+public domain worldwide. This software is distributed without any
+warranty.
+
+You should have received a copy of the CC0 Public Domain Dedication
+along with this software (see the LICENSE.md file). If not, see
+<http://creativecommons.org/publicdomain/zero/1.0/>.
+-->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-3.xsd">
+
+    <!-- 
+    <service noun="subscribe" verb="NodeLifecycleStartedEvent" authenticate="false">
+        <implements service="org.moqui.impl.ServerServices.subscribe#NodeLifecycleEvent"/>
+        <actions>
+            <log level="info" message="Start sidecar Codesys SoftPlc."/>
+            <script><![CDATA[
+                import org.moqui.BaseException
+                import org.moqui.context.ExecutionContextFactory
+                import org.moqui.context.ToolFactory
+
+                import com.hazelcast.cluster.Member
+                import com.hazelcast.core.HazelcastInstance
+ 
+
+                ToolFactory<HazelcastInstance> hzToolFactory = ecf.getToolFactory(HazelcastToolFactory.TOOL_NAME)
+                if (hzToolFactory == null) {
+                    throw new BaseException("HazelcastToolFactory not in place.")
+                } else {
+                    HazelcastInstance hazelcastInstance = hzToolFactory.getInstance()
+                    // get the leader node
+                    Member leader = hazelcastInstance.getCluster().getMembers().iterator().next()
+                    if (hazelcastInstance.getCluster().getLocalMember().getUuid() == leader.getUuid()) {
+                        def proc = "/opt/moqui/startCodesys.sh".execute()
+                        proc.waitFor()
+                        ec.logger.error("Start Codesys command exit code: ${proc.exitValue()}" + "Std Err: ${proc.err.text}" + "Std Out: ${proc.in.text}")
+                    }
+                }
+            ]]></script>
+        </actions>
+    </service>
+    <service noun="subscribe" verb="BasicRemovedClusterMemberEvent" authenticate="false">
+        <implements service="org.moqui.impl.ServerServices.subscribe#NodeLifecycleEventRemovedClusterMemberEvent"/>
+        <actions>
+            <log level="info" message="Stop sidecar Codesys SoftPlc."/>
+            <script><![CDATA[
+                import org.moqui.BaseException
+                import org.moqui.context.ExecutionContextFactory
+                import org.moqui.context.ToolFactory
+
+                import com.hazelcast.cluster.Member
+                import com.hazelcast.core.HazelcastInstance
+ 
+
+                ToolFactory<HazelcastInstance> hzToolFactory = ecf.getToolFactory(HazelcastToolFactory.TOOL_NAME)
+                if (hzToolFactory == null) {
+                    throw new BaseException("HazelcastToolFactory not in place.")
+                } else {
+                    HazelcastInstance hazelcastInstance = hzToolFactory.getInstance()
+                    def proc = "/opt/moqui/stopCodesys.sh".execute()
+                    proc.waitFor()
+                    ec.logger.error("Stop Codesys command exit code: ${proc.exitValue()}" + "Std Err: ${proc.err.text}" + "Std Out: ${proc.in.text}")
+                }
+            ]]></script>
+        </actions>
+    </service>
+    -->
+</services>
