@@ -1,10 +1,10 @@
 <hazelcast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.hazelcast.com/schema/config http://www.hazelcast.com/schema/config/hazelcast-config-4.0.xsd"
+        xsi:schemaLocation="http://www.hazelcast.com/schema/config http://www.hazelcast.com/schema/config/hazelcast-config-5.0.xsd"
         xmlns="http://www.hazelcast.com/schema/config">
 
     <properties>
         <property name="hazelcast.logging.type">slf4j</property>
-        <property name="hazelcast.jcache.provider.type">server</property>
+        <property name="hazelcast.jcache.provider.type">member</property>
 
         <property name="hazelcast.event.queue.capacity">1000000</property>
         <property name="hazelcast.event.queue.timeout.millis">500</property>
@@ -86,6 +86,15 @@
         <queue-capacity>10000</queue-capacity>
         <statistics-enabled>true</statistics-enabled>
     </executor-service>
+    <scheduled-executor-service name="scheduled-service-executor">
+        <!-- Thread pool per member; size matched to typical device-polling workloads. -->
+        <pool-size>16</pool-size>
+        <!-- Durability: 1 backup copy so scheduled tasks survive a single node failure. -->
+        <durability>1</durability>
+        <!-- Capacity per partition (271 partitions by default); 0 = unlimited. -->
+        <capacity>100</capacity>
+        <statistics-enabled>true</statistics-enabled>
+    </scheduled-executor-service>
 
     <cache name="default">
         <key-type class-name="java.lang.Object"/>
